@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import "./App.css";
 import * as BooksAPI from "./BooksAPI";
 import Book from "./components/Book";
@@ -6,7 +7,6 @@ import Header from "./components/Header";
 import Shelves from "./components/Shelves";
 
 const BooksApp = () => {
-  const [showSearchPage, setShowSearchPage] = useState(false);
   const [books, setBooks] = useState([]);
   const [searchBooks, setSearchBooks] = useState([]);
   const [query, setQuery] = useState("");
@@ -35,7 +35,6 @@ const BooksApp = () => {
         }
       });
     }
-
     return () => {
       isActive = false;
       setSearchBooks([]);
@@ -51,7 +50,7 @@ const BooksApp = () => {
       }
     });
     setMergedBooks(combined);
-  }, [searchBooks , mapOfIdToBooks ]);
+  }, [searchBooks, mapOfIdToBooks]);
 
   // Update Book Shelf Function
   const updateBookShelf = (book, whereTo) => {
@@ -68,59 +67,61 @@ const BooksApp = () => {
 
   const createMapOfBook = (books) => {
     const map = new Map();
-    books.map(book => map.set(book.id , book));
+    books.map((book) => map.set(book.id, book));
     return map;
-  }
+  };
 
   return (
     <div className="app">
-      {showSearchPage ? (
-        <div className="search-books">
-          <div className="search-books-bar">
-            <button
-              className="close-search"
-              onClick={() => setShowSearchPage(false)}
-            >
-              Close
-            </button>
-            <div className="search-books-input-wrapper">
-              {/*
-                  NOTES: The search from BooksAPI is limited to a particular set of search terms.
-                  You can find these search terms here:
-                  https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-
-                  However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-                  you don't find a specific author or title. Every search is limited by search terms.
-                */}
-              <input
-                type="text"
-                placeholder="Search by title or author"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="search-books-results">
-            <ol className="books-grid">
-              {mergedBooks.map((b) => (
-                <li key={b.id}>
-                  <Book book={b} changeBookShelf={updateBookShelf} />
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      ) : (
-        <div className="list-books">
-          <Header />
-          <div className="list-books-content">
-            <Shelves books={books} updateBookShelf={updateBookShelf} />
-          </div>
-          <div className="open-search">
-            <button onClick={() => setShowSearchPage(true)}>Add a book</button>
-          </div>
-        </div>
-      )}
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <div className="list-books">
+                <Header />
+                <div className="list-books-content">
+                  <Shelves books={books} updateBookShelf={updateBookShelf} />
+                </div>
+                <div className="open-search">
+                  <Link to="/search">
+                    <button>Add a book</button>
+                  </Link>
+                </div>
+              </div>
+            }
+          ></Route>
+          <Route
+            path="/search"
+            element={
+              <div className="search-books">
+                <div className="search-books-bar">
+                  <Link className="close-search" to="/">
+                    Close
+                  </Link>
+                  <div className="search-books-input-wrapper">
+                    <input
+                      type="text"
+                      placeholder="Search by title or author"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="search-books-results">
+                  <ol className="books-grid">
+                    {mergedBooks.map((b) => (
+                      <li key={b.id}>
+                        <Book book={b} changeBookShelf={updateBookShelf} />
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            }
+          ></Route>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 };
